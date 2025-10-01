@@ -44,7 +44,7 @@ public class LoanService implements ILoanService {
 
     @Override
     public LoanDTO fetchLoan(String mobileNumber) {
-        Loan loan = loanRepository.findByLoanNumber(mobileNumber)
+        Loan loan = loanRepository.findByMobileNumber(mobileNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Loan", "mobileNumber", mobileNumber));
 
         return LoanMapper.mapToLoanDTO(loan, new LoanDTO());
