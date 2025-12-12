@@ -13,3 +13,25 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+  config:
+    import:
+      - "application_qa.yaml"
+      - "application_prod.yaml"
+
+  profiles:
+     active:
+      - "qa"
+
+build:
+  version: "3.0"
+
+
+loans:
+  message: "Welcome to Bank loans related local APIs"
+  contactDetails:
+    name: "John Smith"
+    email: "john.smith@bank.com"
+  onCallSupport:
+    - +14155552671
+    - +14155552672

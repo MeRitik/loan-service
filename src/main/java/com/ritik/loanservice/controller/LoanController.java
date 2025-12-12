@@ -3,6 +3,7 @@ package com.ritik.loanservice.controller;
 import com.ritik.loanservice.constants.LoanConstants;
 import com.ritik.loanservice.dto.ErrorResponseDto;
 import com.ritik.loanservice.dto.LoanDTO;
+import com.ritik.loanservice.dto.LoansContactInfoDTO;
 import com.ritik.loanservice.dto.ResponseDto;
 import com.ritik.loanservice.service.impl.LoanService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +15,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -25,11 +28,20 @@ import org.springframework.web.bind.annotation.*;
 )
 @RestController
 @RequestMapping(value = "/api", produces = "application/json")
-@AllArgsConstructor
 @Validated
 public class LoanController {
 
-    private LoanService loanService;
+    @Value("${build.version}")
+    private String buildVersion;
+    private final LoansContactInfoDTO loansContactInfoDTO;
+    private final LoanService loanService;
+    private final Environment environment;
+
+    public LoanController(LoanService loanService, LoansContactInfoDTO loansContactInfoDTO, Environment environment) {
+        this.loanService = loanService;
+        this.loansContactInfoDTO = loansContactInfoDTO;
+        this.environment = environment;
+    }
 
     @Operation(summary = "Create Loan", description = "Creates a new loan for given mobile number")
     @ApiResponses({
@@ -100,6 +112,76 @@ public class LoanController {
                     .status(HttpStatus.EXPECTATION_FAILED)
                     .body(new ResponseDto(LoanConstants.STATUS_417, LoanConstants.MESSAGE_417_DELETE));
         }
+    }
+
+    @Operation(
+            summary = "Get Build information",
+            description = "Get Build information that is deployed into accounts microservice"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "HTTP Status OK"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "HTTP Status Internal Server Error",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponseDto.class)
+                    )
+            )
+    })
+    @GetMapping("/build-info")
+    public ResponseEntity<String> getBuildInfo() {
+        return ResponseEntity
+                .ok(buildVersion);
+    }
+
+    @Operation(
+            summary = "Get Java Version",
+            description = "Get Java version that is installed in the system"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "HTTP Status OK"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "HTTP Status Internal Server Error",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponseDto.class)
+                    )
+            )
+    })
+    @GetMapping("/java-version")
+    public ResponseEntity<String> getJavaVersion() {
+        return ResponseEntity
+                .ok(environment.getProperty("JAVA_HOME"));
+    }
+
+    @Operation(
+            summary = "Get Contact Info",
+            description = "Contact Info details that can be reached out in case of any issues"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "HTTP Status OK"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "HTTP Status Internal Server Error",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponseDto.class)
+                    )
+            )
+    })
+    @GetMapping("/contact-info")
+    public ResponseEntity<LoansContactInfoDTO> getContactInfo() {
+        System.out.println(loansContactInfoDTO);
+        return ResponseEntity
+                .ok(loansContactInfoDTO);
     }
 
 }
