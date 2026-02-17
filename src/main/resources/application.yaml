@@ -54,3 +54,10 @@ info:
     name: "loans"
     description: "Bank loan Application"
     version: "2.1.1"
+
+
+logging:
+  level:
+    com:
+      ritik:
+        loanservice: DEBUG

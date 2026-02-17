@@ -14,7 +14,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -31,11 +32,13 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 public class LoanController {
 
-    @Value("${build.version}")
-    private String buildVersion;
+    private static final Logger log = LoggerFactory.getLogger(LoanController.class);
+
     private final LoansContactInfoDTO loansContactInfoDTO;
     private final LoanService loanService;
     private final Environment environment;
+    @Value("${build.version}")
+    private String buildVersion;
 
     public LoanController(LoanService loanService, LoansContactInfoDTO loansContactInfoDTO, Environment environment) {
         this.loanService = loanService;
@@ -64,9 +67,10 @@ public class LoanController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
     })
     @GetMapping("/fetch")
-    public ResponseEntity<LoanDTO> fetchLoanDetails(@RequestParam
-                                                    @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
-                                                    String mobileNumber) {
+    public ResponseEntity<LoanDTO> fetchLoanDetails(@RequestHeader(value = "bank-correlation-id") String correlationId, @RequestParam
+    @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
+    String mobileNumber) {
+        log.debug("bank-correlation-id found: {}", correlationId);
         LoanDTO loansDto = loanService.fetchLoan(mobileNumber);
         return ResponseEntity.status(HttpStatus.OK).body(loansDto);
     }
