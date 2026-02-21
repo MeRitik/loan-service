@@ -183,7 +183,6 @@ public class LoanController {
     })
     @GetMapping("/contact-info")
     public ResponseEntity<LoansContactInfoDTO> getContactInfo() {
-        System.out.println(loansContactInfoDTO);
         return ResponseEntity
                 .ok(loansContactInfoDTO);
     }
